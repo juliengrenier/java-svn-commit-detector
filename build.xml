@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- WARNING: Eclipse auto-generated file.
+              Any modifications will be overwritten.
+              To include a user specific buildfile here, simply create one in the same
+              directory with the processing instruction <?eclipse.ant.import?>
+              as the first entry and export the buildfile again. -->
+<project basedir="." default="build" name="svnChangeDetector">
+	<property environment="env" />
+	<property name="debuglevel" value="source,lines,vars" />
+	<property name="target" value="1.5" />
+	<property name="source" value="1.5" />
+	<property name="classesDir" value="./classes" />
+	<property name="testsDir" value="./src/test" />
+	<property name="distDir" value="./dist" />
+	<property name="testsReportDir" value="./junitreports" />
+	<property name="jarName" value="${distDir}/commit-detector.jar"/>
+	<property name="launcher" value="cc.juliengrenier.commitdetector.CommitDetector" />
+	<path id="svnChangeDetector.classpath">
+		<pathelement location="classes" />
+		<pathelement location="lib/svnkit.jar" />
+		<pathelement location="lib/log4j-1.2.8.jar" />
+		<pathelement location="lib/jrss.jar" />
+		<pathelement location="lib/xercesImpl.jar" />
+		<pathelement location="lib/commons-lang-2.1-RC8.jar" />
+		<pathelement location="lib/xml-apis.jar" />
+		<pathelement location="lib/junit.jar" />
+	</path>
+	<path id="run.CommitDetector.classpath">
+		<path refid="svnChangeDetector.classpath" />
+		<pathelement location="resources" />
+	</path>
+	<target name="init">
+		<mkdir dir="${classesDir}" />
+		<copy includeemptydirs="false" todir="classes">
+			<fileset dir="src" excludes="**/*.launch, **/*.java" />
+		</copy>
+	</target>
+	<target name="clean">
+		<delete dir="${classesDir}" />
+	</target>
+	<target depends="clean" name="cleanall" />
+	<target depends="build-project" name="build" />
+	<target depends="init" name="build-project">
+		<echo message="${ant.project.name}: ${ant.file}" />
+		<javac debug="true" debuglevel="${debuglevel}" destdir="classes" source="${source}" target="${target}">
+			<src path="src" />
+			<classpath refid="svnChangeDetector.classpath" />
+		</javac>
+	</target>
+	<target depends="build" name="test">
+		<mkdir dir="${testsReportDir}" />
+		<junit printsummary="yes" haltonfailure="yes">
+			<classpath refid="svnChangeDetector.classpath" />
+
+			<formatter type="plain" />
+
+			<batchtest fork="yes" todir="${testsReportDir}">
+				<fileset dir="${testsDir}">
+					<include name="**/*Test.java" />
+				</fileset>
+			</batchtest>
+		</junit>
+	</target>
+	<target depends="test" name="package">
+		<mkdir dir="${distDir}"/>
+		<jar destfile="${jarName}" basedir="${classesDir}">
+			<manifest>
+				<attribute name="Main-Class" value="${launcher}" />
+			</manifest>
+		</jar>
+	</target>
+	<target name="CommitDetector">
+		<java classname="cc.juliengrenier.commitdetector.CommitDetector" failonerror="true" fork="yes">
+			<jvmarg line="-Dlog4j.configuration=log4j-test.xml" />
+			<arg line="-c -u:file:///svn/repo -v" />
+			<classpath refid="run.CommitDetector.classpath" />
+		</java>
+	</target>
+</project>
