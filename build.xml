@@ -12,18 +12,16 @@
 	<property name="classesDir" value="./classes" />
 	<property name="testsDir" value="./src/test" />
 	<property name="distDir" value="./dist" />
+	<property name="libDir" value="./lib" />
 	<property name="testsReportDir" value="./junitreports" />
-	<property name="jarName" value="${distDir}/commit-detector.jar"/>
+	<property name="jarName" value="${distDir}/commit-detector.jar" />
 	<property name="launcher" value="cc.juliengrenier.commitdetector.CommitDetector" />
+	<path id="svnChangeDetector.lib.classpath">
+		<fileset dir="${libDir}" />
+	</path>
 	<path id="svnChangeDetector.classpath">
 		<pathelement location="classes" />
-		<pathelement location="lib/svnkit.jar" />
-		<pathelement location="lib/log4j-1.2.8.jar" />
-		<pathelement location="lib/jrss.jar" />
-		<pathelement location="lib/xercesImpl.jar" />
-		<pathelement location="lib/commons-lang-2.1-RC8.jar" />
-		<pathelement location="lib/xml-apis.jar" />
-		<pathelement location="lib/junit.jar" />
+		<path refid="svnChangeDetector.lib.classpath"/>
 	</path>
 	<path id="run.CommitDetector.classpath">
 		<path refid="svnChangeDetector.classpath" />
@@ -35,10 +33,16 @@
 			<fileset dir="src" excludes="**/*.launch, **/*.java" />
 		</copy>
 	</target>
-	<target name="clean">
+	<target name="cleanClasses">
 		<delete dir="${classesDir}" />
 	</target>
-	<target depends="clean" name="cleanall" />
+	<target name="cleanTests">
+		<delete dir="${testsReportDir}" />
+	</target>
+	<target name="cleanDist">
+		<delete dir="${distDir}" />
+	</target>	
+	<target depends="cleanClasses,cleanTests,cleanDist" name="cleanall" />
 	<target depends="build-project" name="build" />
 	<target depends="init" name="build-project">
 		<echo message="${ant.project.name}: ${ant.file}" />
@@ -61,11 +65,22 @@
 			</batchtest>
 		</junit>
 	</target>
-	<target depends="test" name="package">
-		<mkdir dir="${distDir}"/>
+	<target depends="cleanall,test" name="package">
+		<mkdir dir="${distDir}" />
+		<pathconvert property="mf.classpath" pathsep=" ">
+			<path refid="svnChangeDetector.lib.classpath" />
+			<chainedmapper>
+				<flattenmapper />
+				<globmapper from="*" to="lib/*" />
+			</chainedmapper>
+		</pathconvert>
+		<copy todir="${distDir}/lib">
+			<fileset dir="${libDir}"/>
+		</copy>
 		<jar destfile="${jarName}" basedir="${classesDir}">
 			<manifest>
 				<attribute name="Main-Class" value="${launcher}" />
+				<attribute name="Class-Path" value="${mf.classpath}" />
 			</manifest>
 		</jar>
 	</target>

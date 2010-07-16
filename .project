@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>svnChangeDetector</name>
+	<name>svn-commit-detector</name>
 	<comment></comment>
 	<projects>
 	</projects>

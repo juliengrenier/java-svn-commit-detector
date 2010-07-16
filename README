@@ -1,0 +1,14 @@
+#############################################
+#                                           #
+#          java svn commit detector         #
+#                                           #
+#                                           #
+#############################################
+
+Package the jar : 
+  ant package
+
+Running the jar : 
+  cd dist
+  java -jar commit-detector.jar 
+
